@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>JQUERY Quiz</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <script>
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+          history.pushState(null, null, location.href);
+          alert("Back button is disabled during the quiz.");
+        };
+      </script>
+
+      <div id="infoCard" class="card">
+        <h1>Student Information</h1>
+        <div id="infoForm">
+          <input id="studentName" type="text" placeholder="Full Name" />
+          <input id="studentSection" type="text" placeholder="Section" />
+          <button id="startBtn">Start Quiz</button>
+        </div>
+      </div>
+
+      <div id="quizArea" style="display: none">
+        <div class="card">
+          <h1>jQuery & JavaScript Quiz</h1>
+          <div style="color: #6b7280; margin-top: 6px">
+            Welcome, <span id="userNameDisplay"></span> —
+            <span id="userSectionDisplay"></span>
+          </div>
+          <div style="color: #6b7280; margin-top: 4px">
+            Answered: <span id="answeredCount">0</span> /
+            <span id="totalCount">30</span>
+          </div>
+        </div>
+
+        <div id="questionsWrap"></div>
+
+        <div
+          class="submit-container"
+          id="submitContainer"
+          style="display: none"
+        >
+          <button id="submitQuiz">Submit Quiz</button>
+        </div>
+
+        <div id="finalArea" class="card" style="display: none">
+          <h2 id="finalScore" style="text-align: center; color: #1a73e8"></h2>
+          <div id="feedbackArea"></div>
+          <center><button id="answerAgain">Answer Again</button></center>
+        </div>
+      </div>
+    </div>
+
+</div>
+    <script>
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+      }
+
+      let questions = [
+        {
+          q: "What is the main purpose of jQuery?",
+          a: [
+            "To replace HTML",
+            "To simplify JavaScript",
+            "To create databases",
+          ],
+          c: 1,
+        },
+        { q: "What is the jQuery symbol?", a: ["#", "$", "@"], c: 1 },
+        {
+          q: "$('p').hide() does what?",
+          a: [
+            "Hides paragraphs",
+            "Deletes paragraphs",
+            "Highlights paragraphs",
+          ],
+          c: 0,
+        },
+        {
+          q: "Correct document ready syntax?",
+          a: ["$(doc).ready()", "$(document).ready()", "doc.ready()"],
+          c: 1,
+        },
+        {
+          q: "Which toggles visibility?",
+          a: ["toggle()", "switch()", "flip()"],
+          c: 0,
+        },
+        {
+          q: "Select all elements:",
+          a: ["$('#all')", "$('*')", "$('all')"],
+          c: 1,
+        },
+        {
+          q: "Fade in an element?",
+          a: ["appear()", "fadeIn()", "showFast()"],
+          c: 1,
+        },
+        { q: "Apply CSS?", a: ["style()", "css()", "setcss()"], c: 1 },
+        { q: "Click listener?", a: [".press()", ".click()", ".tap()"], c: 1 },
+        {
+          q: "slideUp() does what?",
+          a: ["Zooms out", "Slides up & hides", "Changes color"],
+          c: 1,
+        },
+        {
+          q: "Which is TRUE?",
+          a: [
+            "jQuery is JS library",
+            "jQuery replaces JS",
+            "jQuery is backend",
+          ],
+          c: 0,
+        },
+        {
+          q: "Select by class:",
+          a: ["$('class')", "$('.class')", "$('#class')"],
+          c: 1,
+        },
+        { q: "Select by ID:", a: ["#id", ".id", "id()"], c: 0 },
+        {
+          q: "Remove element:",
+          a: [".delete()", ".remove()", ".destroy()"],
+          c: 1,
+        },
+        { q: "AJAX method:", a: ["ajax.run()", "$.ajax()", "ajax.go()"], c: 1 },
+        {
+          q: "Who created JavaScript?",
+          a: ["Steve Jobs", "Brendan Eich", "Elon Musk"],
+          c: 1,
+        },
+        {
+          q: "JavaScript is a…",
+          a: ["Styling language", "Programming language", "Database language"],
+          c: 1,
+        },
+        {
+          q: "JavaScript is inserted using:",
+          a: ["<script>", "<javascript>", "<code>"],
+          c: 0,
+        },
+        {
+          q: "Log to console:",
+          a: ["console.print()", "console.log()", "log.console()"],
+          c: 1,
+        },
+        { q: "Comparison operator:", a: ["=", "==", "--"], c: 1 },
+        {
+          q: "Declare a variable:",
+          a: ["var/let/const", "int", "declare"],
+          c: 0,
+        },
+        {
+          q: "innerHTML modifies:",
+          a: ["CSS", "HTML content", "The URL"],
+          c: 1,
+        },
+        { q: "Single-line comment:", a: ["", "//", "/* */"], c: 1 },
+        { q: "Alert message:", a: ["msg()", "alert()", "box()"], c: 1 },
+        { q: "NOT a JS data type:", a: ["boolean", "string", "table"], c: 2 },
+        {
+          q: "=== checks:",
+          a: ["Value only", "Value & type", "Nothing"],
+          c: 1,
+        },
+        { q: "Stop a loop:", a: ["stop", "finish", "break"], c: 2 },
+        { q: "Create an array:", a: ["array()", "[]", "{}"], c: 1 },
+        { q: "Runs repeatedly:", a: ["repeat()", "for/while", "loop()"], c: 1 },
+        { q: "Button click event:", a: ["onpress", "onclick", "ontap"], c: 1 },
+      ];
+
+      let selections = {};
+
+      $("#startBtn").click(() => {
+        let n = $("#studentName").val().trim();
+        let s = $("#studentSection").val().trim();
+        if (!n || !s) {
+          alert("Fill all fields");
+          return;
+        }
+
+        $("#userNameDisplay").text(n);
+        $("#userSectionDisplay").text(s);
+        $("#infoCard").hide();
+        $("#quizArea").show();
+
+        shuffle(questions);
+        renderAll();
+      });
+
+      function renderAll() {
+        let wrap = $("#questionsWrap");
+        wrap.empty();
+        selections = {};
+        $("#answeredCount").text(0);
+        $("#totalCount").text(questions.length);
+        $("#finalArea").hide();
+        $("#submitContainer").show();
+
+        questions.forEach((q, qi) => {
+          let qc = $("<div>")
+            .addClass("question")
+            .attr("id", "qcard" + qi);
+
+          let header = $("<div>").addClass("q-header");
+          header.append(
+            $("<div>")
+              .addClass("q-title")
+              .text(qi + 1 + ". " + q.q)
+          );
+          header.append(
+            $("<button>").addClass("toggle-btn").attr("data-q", qi).text("Hide")
+          );
+
+          qc.append(header);
+
+          let answersContainer = $("<div>").addClass("q-answers");
+          answersContainer.append(
+            $("<div>").addClass("q-sub").text("Select one:")
+          );
+
+          let ans = $("<div>");
+          let opt = q.a.map((t, i) => ({ t, i }));
+          shuffle(opt);
+
+          opt.forEach((o) => {
+            ans.append(
+              $("<button>")
+                .addClass("ansBtn")
+                .attr("data-q", qi)
+                .attr("data-val", o.i)
+                .text(o.t)
+            );
+          });
+
+          answersContainer.append(ans);
+          qc.append(answersContainer);
+          wrap.append(qc);
+        });
+      }
+
+      $(document).on("click", ".toggle-btn", function (e) {
+        e.stopPropagation();
+        let qid = $(this).attr("data-q");
+        let qcard = $(`#qcard${qid}`);
+
+        if (qcard.hasClass("collapsed")) {
+          qcard.removeClass("collapsed");
+          $(this).text("Hide");
+        } else {
+          qcard.addClass("collapsed");
+          $(this).text("Show");
+        }
+      });
+
+      $(document).on("click", ".ansBtn", function () {
+        let qid = parseInt($(this).attr("data-q"));
+        let chosen = parseInt($(this).attr("data-val"));
+
+        $(`#qcard${qid} .ansBtn`).removeClass("selected");
+        $(this).addClass("selected");
+        selections[qid] = chosen;
+
+        $("#answeredCount").text(Object.keys(selections).length);
+      });
+
+      $("#submitQuiz").click(() => {
+        let unansweredCount = questions.length - Object.keys(selections).length;
+
+        if (unansweredCount > 0) {
+          alert(
+            "⚠️ Please answer all questions before submitting!\n\n" +
+              "You have " +
+              unansweredCount +
+              " unanswered question(s).\n" +
+              "Answered: " +
+              Object.keys(selections).length +
+              " / " +
+              questions.length
+          );
+
+          // Scroll to first unanswered question
+          for (let i = 0; i < questions.length; i++) {
+            if (selections[i] === undefined) {
+              $("html, body").animate(
+                {
+                  scrollTop: $("#qcard" + i).offset().top - 100,
+                },
+                500
+              );
+              break;
+            }
+          }
+          return;
+        }
+
+        $("#questionsWrap").empty();
+        $("#submitContainer").hide();
+
+        let feedbackArea = $("#feedbackArea");
+        feedbackArea.empty();
+
+        let score = 0;
+        questions.forEach((q, qi) => {
+          let chosen = selections[qi];
+          let correct = q.c;
+          let isCorrect = chosen === correct;
+
+          if (isCorrect) score++;
+
+          let fb = $("<div>").addClass("feedback-compact");
+          fb.append(
+            $("<div>")
+              .addClass("fb-status " + (isCorrect ? "fb-correct" : "fb-wrong"))
+              .text(isCorrect ? "✓" : "✕")
+          );
+
+          let feedbackContent = $("<div>").addClass("fb-content");
+
+          let questionText = $("<div>")
+            .addClass("fb-question")
+            .html("<strong>Q" + (qi + 1) + ":</strong> " + q.q);
+          feedbackContent.append(questionText);
+
+          let answerText = $("<div>").addClass("fb-answer");
+          if (isCorrect) {
+            answerText.html(
+              "<span style='color: green;'>✓ Correct!</span> Your answer: <strong>" +
+                q.a[chosen] +
+                "</strong>"
+            );
+          } else {
+            answerText.html(
+              "<span style='color: #b91c1c;'>✗ Wrong</span><br>" +
+                "Your answer: <span style='text-decoration: line-through;'>" +
+                q.a[chosen] +
+                "</span><br>" +
+                "Correct answer: <strong style='color: green;'>" +
+                q.a[correct] +
+                "</strong>"
+            );
+          }
+          feedbackContent.append(answerText);
+
+          fb.append(feedbackContent);
+          feedbackArea.append(fb);
+        });
+
+        let total = questions.length;
+        let percentage = Math.round((score / total) * 100);
+
+        $("#finalScore").html(
+          "Your Score: <span style='font-size: 32px; font-weight: 700; color: #1a73e8;'>" +
+            score +
+            " / " +
+            total +
+            "</span><br>" +
+            "<span style='font-size: 24px; color: #4CAF50;'>(" +
+            percentage +
+            "%)</span>"
+        );
+
+        $("#finalArea").show();
+        $("html,body").animate({ scrollTop: 0 }, 300);
+      });
+
+      $("#answerAgain").click(() => {
+        shuffle(questions);
+        renderAll();
+        $("html,body").animate({ scrollTop: 0 }, 300);
+      });
+    </script>
+  </body>
+</html>
